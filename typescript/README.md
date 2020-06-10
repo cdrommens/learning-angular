@@ -19,9 +19,11 @@ Start the lite server : `npm start`
 
 ## Core Types
 
-number|1, 5.3, -10|all number, no difference between ints and floats (float by default, 5 -> 5.0
-string|"s",'s'|all text values
-boolean|true, false|so no 0,1 or N,Y
+Type | Example | Description
+---- | ------- | -----------
+number | 1, 5.3, -10 | all number, no difference between ints and floats (float by default, 5 -> 5.0
+string | "s",'s' | all text values
+boolean | true, false| so no 0,1 or N,Y
 
 usage in function : function add(n1*: number*, n2*: number*) {
 
