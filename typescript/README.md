@@ -47,6 +47,8 @@ alias type : `type OwnType = number | string;`
 `function name(arg1: type, ...) : type {}`
 return type is always inferred automatically (so don't define it yourself unless necesarry) (can also be void)
 
+use arg ?: number for an optional argument
+
 Function type:
 combinedValues can have a pointer to a function that accepts 2 number arguments and returns a number :
 `let combinedValues: (a: number, b: number) => number;`
@@ -60,3 +62,6 @@ typeof n1 === 'number' : checks if n1 is of type number (or !==)
 for loop : `for (const variable in list) {}`
 
 convert text to number : *+*varThatHoldsNumberAsAText
+
+## TypeScript Compiler
+
