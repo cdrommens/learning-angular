@@ -15,10 +15,10 @@ edit package.json and add in the style section: `"node_modules/bootstrap/dist/cs
 
 ## Section 2 - The basics
 
-create component : `ng generate component name` or `ng g c name``
+create component : `ng generate component name` or `ng g c name`
 
 Always decorate the class with :
-```
+```javascript
 @Component({
     selector: 'html-tag-name',    //unique
     templateUrl: '.html',
@@ -63,7 +63,7 @@ $event has all the data available for that event.
 #### Two-way-binding
 
 Add FormsModule to the imports array in AppModule :
-```
+```javascript
 import { FormsModule } from '@angular/forms';
 imports: [
     BrowserModule,
@@ -78,5 +78,5 @@ Directives are own created html properties that start with * (this means  that t
 There are also build in directives :
 * ngIf : `<p *ngIf="expression">`
 * ngIf with else : `<p *ngIf="expression; else <marker keyword>">`
-* ngStyle to add styles : `<p [ngStyle]="{css-style-selector: method()}">`. For example `[ngStyl]="{backgroundColor: getColor()}"`
+* ngStyle to add styles : `<p [ngStyle]="{css-style-selector: method()}">`. For example `[ngStyle]="{backgroundColor: getColor()}"`
 * ngClass to add classes : `[ngClass]="{css-class: expression}"`. For example `[ngClass]="{online: serverStatus === 'online'}"`
