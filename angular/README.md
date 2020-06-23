@@ -74,9 +74,10 @@ You can then use in the html `[(ngModel)]="variable"`.
 
 ### Directives
 
-Directives are own created html properties that start with * (this means  that there will be some structural changes to the DOM). 
+Directives are own created html properties. Some start with * (this means  that there will be some structural changes to the DOM). 
 There are also build in directives :
 * ngIf : `<p *ngIf="expression">`
 * ngIf with else : `<p *ngIf="expression; else <marker keyword>">`
 * ngStyle to add styles : `<p [ngStyle]="{css-style-selector: method()}">`. For example `[ngStyle]="{backgroundColor: getColor()}"`
 * ngClass to add classes : `[ngClass]="{css-class: expression}"`. For example `[ngClass]="{online: serverStatus === 'online'}"`
+* ngFor : `<p *ngFor="let var of array; let i = index">`: repeats p for every element *var* in the **array**. For example `<p *ngFor="let server of servers"></p>`. Keyword *index* gives you the index of the current item in the array that is used in ngFor.
