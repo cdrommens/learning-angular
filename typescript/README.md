@@ -63,5 +63,4 @@ for loop : `for (const variable in list) {}`
 
 convert text to number : *+*varThatHoldsNumberAsAText
 
-## TypeScript Compiler
-
+multiline expressions : use backtics
