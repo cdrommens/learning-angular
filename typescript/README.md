@@ -64,3 +64,12 @@ for loop : `for (const variable in list) {}`
 convert text to number : *+*varThatHoldsNumberAsAText
 
 multiline expressions : use backtics
+
+```typescript
+export class Ingredient {
+
+  constructor(public name: string, public amount: number) {}
+}
+````
+
+is the same as defined 2 public arguments name and number

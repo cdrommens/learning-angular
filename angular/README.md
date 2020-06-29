@@ -11,7 +11,9 @@ when having errors :
 * Then run `npm update` in your project
 
 add bootstrap : `npm install --save bootstrap@latest`
-edit package.json and add in the style section: `"node_modules/bootstrap/dist/css/bootstrap.min.css"`
+edit angular.json and add in the style section: `"node_modules/bootstrap/dist/css/bootstrap.min.css"`
+
+Since Angular 9 : `ng add @ng-bootstrap/schematics`
 
 ## Section 2 - The basics
 
@@ -81,3 +83,5 @@ There are also build in directives :
 * ngStyle to add styles : `<p [ngStyle]="{css-style-selector: method()}">`. For example `[ngStyle]="{backgroundColor: getColor()}"`
 * ngClass to add classes : `[ngClass]="{css-class: expression}"`. For example `[ngClass]="{online: serverStatus === 'online'}"`
 * ngFor : `<p *ngFor="let var of array; let i = index">`: repeats p for every element *var* in the **array**. For example `<p *ngFor="let server of servers"></p>`. Keyword *index* gives you the index of the current item in the array that is used in ngFor.
+
+## Section 5 - Components & Databinding
