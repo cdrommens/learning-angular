@@ -85,3 +85,66 @@ There are also build in directives :
 * ngFor : `<p *ngFor="let var of array; let i = index">`: repeats p for every element *var* in the **array**. For example `<p *ngFor="let server of servers"></p>`. Keyword *index* gives you the index of the current item in the array that is used in ngFor.
 
 ## Section 5 - Components & Databinding
+
+### Passing to custom properties (from Parent to Child)
+
+In your child component, expose a property to the outside with `@Input()`:
+```typescript
+@Component()
+export class ChildComponent() {
+    @Input() property: {var: string};
+}
+```
+Then in the HTML of the parentComponent : `<app-child-component [property] = "{var: 'value'}"></app-child-component>`.
+You can also use aliasses : `@Input('aliasProperty') property: {var: string};`. 
+Then you must use it in the HTML as `<app-child-component [aliasProperty] = "{var: 'value'}"></app-child-component>`.
+
+### Passing to custom events (from Child To Parent)
+
+In the child component, expose an event to the outside with data in in with `@Output()`:
+```typescript
+@Output() eventToHandle = new EventEmitter<{
+    var: string;
+  }>();
+```
+This is an event called *eventToHandle* with a data record in it which has field var with type string.
+To send this event to the parent, use the EventEmitter in a function:
+```typescript
+function() {
+    this.eventToHandle.emit({
+        var: 'value';
+    });
+}
+```
+In the parent component, you can listen to that event with event binding:
+`<app-child-component (eventToHandle)="functionToHandleEvent($event)"></app-child-component>`
+The function to handle the event, could then look like this (watch the fact that eventData has the same structure as the structure in the EventEmitter in the child):
+```typescript
+functionToHandleEvent(eventData: {var: string}) {
+    //do sth with eventData, for example : eventData.var
+}
+```
+Also here aliasses can be used.
+
+### View encapsulation
+
+All styles defined in the different css files, only apply to the component itself. So you can't use a CSS class from component X in component Y.
+If you want to change it, you have to add an option to the @Component:
+`encapsulation: ViewEncapsulation.option``
+option can consist of 3 values:
+* EMULATED : default behaviour
+* NONE : no encapsulation is used, this means that the styles in this component will be affected from the outside
+* EMULATED : uses the shadow DOM (not supported in all browsers)
+
+### Local References
+If you don't want 2way binding, you can pass a reference with `#referenceName` of the HTML component to somewhere else in the template:
+```html
+<input type="text" #referenceName>
+<button (click)="function(referenceName)">Do</button>
+```
+In the code, you can then use this reference to the HTML component:
+```typescript
+function(input as HTMLInputElement) {
+    // do sth with input.value
+}
+````
