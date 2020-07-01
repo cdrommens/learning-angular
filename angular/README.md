@@ -147,4 +147,64 @@ In the code, you can then use this reference to the HTML component:
 function(input as HTMLInputElement) {
     // do sth with input.value
 }
-````
+```
+So you pass a reference of the html component via parameters to a function in the template.
+
+### Access to the template & DOM
+If you want to pass a reference of the component to the typescript code, you can use a local reference `#referenceName`in combination with `@ViewChild()`:
+```html
+<input type="text" #referenceName>
+```
+In the code, you can the use this reference to the component (mark that is is a reference, not the component itself):
+```typescript
+@ViewChild('referenceName', {static: true}) input: ElementRef;
+function() {
+    // do sth with input.nativeElement.value
+}
+```
+Add `{static: true}`if you want to access the selected element in ngOnInit().
+
+So you pass a reference of the html to the code directly.
+
+### Add own html content to your component with a directive
+If you want to add HTML code in your own component, use `ng-content`.
+So in the template of your component:
+```html
+<div>
+    <ng-content></ng-content>
+</div>
+```
+
+You can then use the component like this:
+```html
+<app-component>
+    <h1>header</h1>
+</app-component>
+```
+So the html between *app-component* will be placed instead of *ng-content*. Default behaviour is that Angular removes everything inside the tags of own components. You can also use _references_ in ng-content :
+```html
+<app-component>
+    <h1 #referenceName>header</h1>
+</app-component>
+```
+And in the code :
+```typescript
+@ContentChild('referenceName', {static: true}) input: ElementRef;
+function() {
+    // do sth with input.nativeElement.value
+}
+```
+
+### Lifecycle hooks
+
+Available hooks :
+* ngOnChanges : called after a bound input property changes (@Input)
+* ngOnInit : component is initialized and after the constructor (before added to the DOM)
+* ngDoCheck : called during every change detection
+* ngAfterContentInit : called after ng-content has been projected in the view
+* ngAfterContentCheck : called after every ng-content content has been changed
+* ngAfterViewInit: called after the component views (and child views) has been initialized
+* ngAfterViewChecked : called every time when the view (and child views) have been checked
+* ngOnDestroy : called once the component will be destroyed
+
+To use these, always implement the corresponding interface. For example `export class MyComponent implements ngOnInit {}`
