@@ -83,6 +83,7 @@ There are also build in directives :
 * ngStyle to add styles : `<p [ngStyle]="{css-style-selector: method()}">`. For example `[ngStyle]="{backgroundColor: getColor()}"`
 * ngClass to add classes : `[ngClass]="{css-class: expression}"`. For example `[ngClass]="{online: serverStatus === 'online'}"`
 * ngFor : `<p *ngFor="let var of array; let i = index">`: repeats p for every element *var* in the **array**. For example `<p *ngFor="let server of servers"></p>`. Keyword *index* gives you the index of the current item in the array that is used in ngFor.
+* ngSwitch : `<div [ngSwitch]="value"><p *ngSwitchCase="5">Show when value is 5</p>...</div>`
 
 ## Section 5 - Components & Databinding
 
@@ -208,3 +209,103 @@ Available hooks :
 * ngOnDestroy : called once the component will be destroyed
 
 To use these, always implement the corresponding interface. For example `export class MyComponent implements ngOnInit {}`
+
+## Section 7 - Understaing directives
+
+There are 2 types of directives :
+* attribute directives : look like a normal HTML attribute ; they only change the the element they are added to ([ngClass], [ngStyle])
+* structural directives : look like a normal HTML attribute but with a leading * ; they affect the whole area in the DOM (*ngIf, *ngFor)
+
+create a new one with `ng g directive directiveName`.
+
+Your directive could like like this then :
+```typescript
+@Directive({
+  selector: '[appBasicHighlight]'    // [] : use it as an attribute
+})
+export class BasicHighlightDirective implements OnInit{
+  constructor(private elementRef: ElementRef, private renderer: Renderer2) {
+
+  }
+
+  ngOnInit() {
+    this.renderer.... // here you can do whatever you want in the renderer and you can access the element with this.elementRef.nativeElement
+    this.renderer.setStyle(this.elementRef.nativeElement, 'backgroundColor', 'blue');
+  }
+}
+```
+The selector show how we can use the directive. If it is between [], then it means that it's an attribute directive. 
+The element where the directive is used on, is injected in the constructor (private is mandatory!). 
+We use the renderer to manipulate the DOM and it must also be injected in the constructor.
+We can then use everything together in NgOnInit().
+To check what the renderer can do, check [here](https://angular.io/api/core/Renderer2).
+
+### Listen to host events
+
+To capture events on the directive, use the `@HostListener('name-of-the-event') function(eventData: Event){}`.
+So the argument of the @HistListener is the javascript event that you want to bind to :
+
+```typescript
+@HostListener('mouseenter') mouseOver(eventData: Event) {
+    this.renderer.setStyle(
+      this.elementRef.nativeElement,
+      'backgroundColor',
+      'blue'
+    );
+  }
+```
+
+### Binding to simple properties
+
+If you want to bind to simple properties, for example the backgroundColor, then using the renderer is a bit overkill. 
+You can use `@HostBinding('name-of-the-property') propertyName: type = initial value`.
+For example if you want to only change the backgroundColor:
+```typescript
+@HostBinding('style.backgroundColor') backgroundColor: string = 'transparent';
+
+function() {
+    this.backgroundColor = 'blue';
+}
+```
+
+### Bindin to directive properties
+
+If you want to pass data to your directive, you can use @Input() fields to pass it down :
+`@Input() property: string;`
+And in the HTML : `<p appMyDirective [property]="'value'">Style me with better directive!</p>`.
+
+You can see 2 things : we have an extra property binding and the value is a string, so it should be enclosed with '', which means we have here "'value'".
+To change this, we can set the alias of the @Input to the name of the directive :
+`@Input('appMyDirective') property: string;`.
+You can then use it in the HTML:
+`<p [appMyDirective]="'value'">Style me with better directive!</p>`.
+
+If you want to pass a string and want to loose the "''", then you must delete the []:
+`<p appMyDirective="value">Style me with better directive!</p>`.
+
+### Structural directive
+
+For creating an own structural directive, use a setter of the same name as the directive as @Input.
+Inject in the constructor the template where the directive is working on through TemplateRef and the place in the DOM through ViewContainerRef:
+```typescript
+@Directive({
+  selector: '[appMyDirective]',
+})
+export class MyDirective {
+  @Input() set appMyDirective(condition: boolean) {
+    if (!condition) {
+      this.vcRef.createEmbeddedView(this.templateRef);
+    } else {
+      this.vcRef.clear();
+    }
+  }
+  constructor(
+    private templateRef: TemplateRef<any>,
+    private vcRef: ViewContainerRef
+  ) {}
+}
+```
+YOu can use it in the HTML :
+```html
+<div *appMyDirective="condition"> template to show </div>
+```
