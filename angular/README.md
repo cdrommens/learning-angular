@@ -15,6 +15,8 @@ edit angular.json and add in the style section: `"node_modules/bootstrap/dist/cs
 
 Since Angular 9 : `ng add @ng-bootstrap/schematics`
 
+On Mac, fixing terminal in VSCode : add in settings.json : `"terminal.integrated.shellArgs.osx": []`
+
 ## Section 2 - The basics
 
 create component : `ng generate component name` or `ng g c name`
