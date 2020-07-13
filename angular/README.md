@@ -311,3 +311,41 @@ YOu can use it in the HTML :
 ```html
 <div *appMyDirective="condition"> template to show </div>
 ```
+
+## Section 9 - Services and dependency injection
+
+Create a new service with `ng g s ServicenameService`
+You can then use this service in a component, by injecting it in the constructor (private is a shortcut for a private final field):
+```typescript
+@Component({
+  selector: 'app-my-component',
+  templateUrl: './my-component.component.html',
+  styleUrls: ['./my-component.component.css'],
+  providers: [ServicenameService]    // used for injection
+})
+export class MyComponent {
+  constructor(private servicenameService: ServicenameService) {}
+
+  function() {
+    this.servicenameService.doSth();
+  }
+}
+```
+
+Injection in angular is a hierarchical injector:
+* *AppModule* : same instance of Service is available application wide
+* *AppComponent* : same instance of Service is available for all components (and child components) but nog for other services
+* *any other component* : same instance of Service is available for this component and child components, but not for the rest
+So inejection always goes down the tree, not up or sideways.
+
+So if you specify a service in the **providers** section of @Component, this will create a new instance of the service. If you just pass it in the constructor without mentioning it in the providers, it will pass down the instance of the parent.
+
+A service that is used in the whole application, is added in the **providers** section of the AppModule in @NgModule. 
+Also needed if you want to inject a service into a sevice. You then have to add an extra decorator `@Injectable()`
+
+In Angular 6+, there is a shorter syntax. If you want your service to be available globally, just use :
+```typescript
+@Injectable({providedIn: 'root'})
+export class MyService { ... }
+```
+
