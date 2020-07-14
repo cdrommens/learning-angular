@@ -336,7 +336,7 @@ Injection in angular is a hierarchical injector:
 * *AppModule* : same instance of Service is available application wide
 * *AppComponent* : same instance of Service is available for all components (and child components) but nog for other services
 * *any other component* : same instance of Service is available for this component and child components, but not for the rest
-So inejection always goes down the tree, not up or sideways.
+So injection always goes down the tree, not up or sideways.
 
 So if you specify a service in the **providers** section of @Component, this will create a new instance of the service. If you just pass it in the constructor without mentioning it in the providers, it will pass down the instance of the parent.
 
@@ -349,3 +349,34 @@ In Angular 6+, there is a shorter syntax. If you want your service to be availab
 export class MyService { ... }
 ```
 
+### Cross component communication
+
+Component B wants to change if something happens in Component A. We can use a Service for that.
+First create MyService and define an EventEmitter :
+```typescript
+@Injectable({
+  providedIn: 'root',
+})
+export class MyService {
+  mySelected = new EventEmitter<string>();
+}
+```
+
+In Component A, when you click a button, you can emit an event on the service:
+In the html : `<button (click)="do()">`.
+```typescript
+//inject MyService
+do() {
+  this.myService.mySelected.emit(//data);
+}
+```
+
+In Component B, you can listen on those events by subscribing on the EventEmitter:
+```typescript
+//inject MyService
+ngOnInit() {
+    this.myService.mySelected.subscribe((data: data-type) => {
+      //action to be taken
+    });
+  }
+```
