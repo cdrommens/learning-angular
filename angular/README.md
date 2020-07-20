@@ -380,3 +380,185 @@ ngOnInit() {
     });
   }
 ```
+
+## Section 11 - Routing
+
+### Global
+Setting routes in angular can be done by adding them in AppModule:
+```typescript
+import { Routes, RouterModule } from '@angular/router';
+
+const appRoutes: Routes = [
+  { path: '', component: HomeComponent },
+  { path: 'segment', component: MyComponent },
+  ...
+];
+@NgModule({
+  ...
+  imports: [BrowserModule, FormsModule, RouterModule.forRoot(appRoutes)],
+  ...
+})
+```
+So each part of the **path** will be appended in the url (for example localhost:4200/segment) and the corresponding Component will be loaded.
+You have to tell in the HTML of AppModule where to load the component by defining `<router-outlet></router-outlet>`.
+
+If you have more then 2 or 3 routes, you can also add it a seperate **app-routing.module.ts** file.
+
+### Navigating
+
+You can navigate to the different routes by adding the directive **routerLink** to the HTML : `<a routerLink="/segment">Link</a>`.
+Never link directly to the different segment with href, because this will cause your applicaton to reload!
+Also don't forget the leading /, otherwise Angular will treat this as a relative path and thus append the current path to the route you specified in routerLink. (./ and ../ are also supported).
+To set a link as active (so assigning a class) for the route we are on, just add `routerLinkActive="css-class"`to the link. This will analyse the url you are in to and if the routerLink is matched with the url, the class will be assigned.
+Mark that for / this is always true, because / is always in the URL. To bypass this, you can add an option : `[routerlinkActiveOptions]="{exact: true}"`.
+The class will then only be assigned if the routerLink is exactly the same as the URL.
+
+### Navigating programmaticaly
+
+We can do this by injecting the Router service and calling navigate on it. As arguments you provide an array of url segments :
+```typescript
+constructor(private router: Router) {}
+
+function() {
+  this.router.navigate(['/segment1','segment2',...]); // will go to /segment1/segment2/...
+}
+```
+Remark that navigate() doesn't know on which route you are (unlike routerLink), so if you use relative paths or not, it's still the same.
+If you want to know this, you have to inject ActivatedRoute and pass it as a paramter in navigate:
+```typescript
+constructor(private router: Router, private route: ActivatedRoute) {}
+
+function() {
+  this.router.navigate(['/segment'], {relativeTo: this.route});
+}
+```
+
+### Passing parameters to routes
+
+You can specify a part in your route as a parameter by preceding it with `:`:
+`{ path: 'segment/:param', component: MyComponent },` where **param** is the parameter.
+You can then use those parameter by injected ActivatedRoute :
+```typescript
+constructor(private route: ActivatedRoute) {}
+
+ngOnInit() {
+  this.route.snapshot.params['param'];
+}
+```
+Using the snapshot is only permitted in the initialisation, because angular will only rerender the component the first time you enter the component. So if you go to another URL on the same segment with a different value in the param, angular will not update the component. Therefor you have to use an observable to update the things you want :
+```typescript
+ngOnInit() {
+  this.route.snapshot.params['param']; // initializing value
+  this.route.params.subscribe((params: Params) => { // do sth every time the value changes
+        // do sth with params['param]
+      });
+}
+```
+So only use observable if you know that the component will change when you are already on the component. If your component always changes by navigating to it from other components, you don't need to use observables and your fine with snapshot.
+
+### Passing query parameters
+
+You can pass query parameters (?param=value) and fragment (#fragment) like this :
+`[queryParams]="{param: 'value'}" fragment="fragment"`.
+
+Programmatically you can do this in the navigate as an option:
+`this.router.navigate(['/segment'], {queryParams: {param: value}, fragment: 'fragment'});`. 
+
+This will navigate to : /segment?param=value#fragment
+
+You can then again use it in the snapshot (snapshot.queryParams or snapshot.fragment) or as an observable.
+Remeber, if you get params programatically, it wil always be a **string**. So if you want it to be for example a number, you have to precede it with + :
+`const id: number = +this.route.snapshot.params['param'];`
+
+If you want to navigate to another link while preserving the query parameters (so if you are at /segment?param=value and you want to go to /segment2?param=value), you need to add another option : `{queryParamsHandling: 'merge'}`. This will merge all the query parameters from the url you are coming from to the url you are going too. **preserve** is another option.
+
+### Nested routes
+
+You can also use nested routes to group routes together with the extra **children** array:
+
+```typescript
+const appRoutes: Routes = [
+  { path: '', component: HomeComponent },
+  { path: 'segment', component: MyComponent,
+    children: [
+      { path: 'segment2', component: MyComponent2} , // will give /segment/segment2
+      { path: ':param', component: MyComponent3} , // will give /segment/<param>
+      ...
+    ] },
+  ...
+];
+```
+Don't forget to add a `<router-outlet></router-outlet>`to the HTML of the parent route so that the child templates can be loaded.
+
+### Redirecting and wildcards
+
+To redirect to a 404 page when an url is not found, you need to add a wildcard route :
+```typescript
+{path: 'not-found', component: PageNotFoundComponent},
+{path: '**', redirectTo: '/not-found'}  // should be the last one!
+```
+Remark: angular mathes paths by prefix, so /segment will match / and segment. If you only want to match the whole /segment, you need to add the option `pathMatch: 'full'` in your path segment.
+
+### Guards
+
+Guards is a piece of logic that is executed everytime a route is accessed.
+
+First create a service that implements **CanActivate** :
+```typescript
+export class AuthGuard implements CanActivate {
+  constructor(private router: Router) {}
+
+  canActivate(
+    route: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot
+  ): Observable<boolean> | Promise<boolean> | boolean {
+    // implement your authentication logic
+  }
+}
+```
+
+THen add this guard to every route you want with the option **canActivate** :
+`{ path: 'segment', canActivate: [AuthGuard], component: MyComponent}`
+
+If you want to only secure the child routes and not the parent, you have to implement an extra interface **CanActivateChild** in the guard, and in the rout use **canActivateChild**.
+
+### Keeping the user from accidentily navigating away
+
+Create a new interface :
+```typescript
+export interface CanComponentDeactivate {
+  canDeactivate: () => Observable<boolean> | Promise<boolean> | boolean;
+}
+```
+
+Next create a new service that implements **CanDeactivate** with as parameter the new interface :
+```typescript
+@Injectable({
+  providedIn: 'root'
+})
+export class CanDeactivateGuard implements CanDeactivate<CanComponentDeactivate> {
+
+  constructor() { }
+
+  canDeactivate(component: CanComponentDeactivate,
+                currentRoute: ActivatedRouteSnapshot,
+                currentState: RouterStateSnapshot,
+                nextState?: RouterStateSnapshot): boolean | Observable<boolean> | Promise<boolean> {
+    return component.canDeactivate();
+  }
+}
+```
+In the route you want to check add `canDeactivate: [CanDeactivateGuard]`.
+
+Every component that needs to be checked, now needs to implement the interface **CanComponentDeactivate** and implement the logic for checking :
+```typescript
+export class EditServerComponent implements OnInit, CanComponentDeactivate {
+  canDeactivate(): boolean | Observable<boolean> | Promise<boolean> {
+    if ( // data has changed) {
+      return confirm('Do you want to discard the changes?');
+    } else {
+      return true;
+    }
+  }
+}
+```

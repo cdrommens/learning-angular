@@ -27,7 +27,7 @@ export class RecipeService {
   constructor(private shoppingListService: ShoppingListService) {}
 
   getRecipes() {
-    return this.recipes.slice(); //otherwise we return a ref to recipes, with splice(), we return a copy
+    return this.recipes.slice(); // otherwise we return a ref to recipes, with splice(), we return a copy
   }
 
   addIngredientsToShoppingList(ingredients: Ingredient[]) {
