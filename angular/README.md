@@ -552,7 +552,7 @@ In the route you want to check add `canDeactivate: [CanDeactivateGuard]`.
 
 Every component that needs to be checked, now needs to implement the interface **CanComponentDeactivate** and implement the logic for checking :
 ```typescript
-export class EditServerComponent implements OnInit, CanComponentDeactivate {
+export class MyComponent implements OnInit, CanComponentDeactivate {
   canDeactivate(): boolean | Observable<boolean> | Promise<boolean> {
     if ( // data has changed) {
       return confirm('Do you want to discard the changes?');
@@ -562,3 +562,38 @@ export class EditServerComponent implements OnInit, CanComponentDeactivate {
   }
 }
 ```
+
+### Passing static data to a route
+
+You can pass static data to a route by adding the **data** attribute in your path:
+`{path: 'segment', component: MyComponent, data: {param: 'value'}}`.
+
+You can then access this in your component by using the snapshot or subscribe : `this.route.snapshot.data['param'];`.
+
+### Passing dynamic data to a route
+
+If you want the data to load before the route is displayed, use a resolver (for example fetch data from backend).
+A resolver first load data that the component needs and then will render the component (alternative is to first render the component and then fetch the data in the onInit method).
+
+So first create a resolver service that implement **Resolve** (MyObject is the data that is fetched and returned):
+```typescript
+export class MyObjectResolver implements Resolve<MyObject> {
+
+  resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): MyObject | Observable<MyObject> | Promise<MyObject> {
+    // return MyObject data fetched from the backend through a service
+  }
+}
+```
+Next add this resolved to the route through **resolve**: `{ path: ':id', component: MyComponent, resolve: { param: MyObjectResolver} }`.
+
+When the route is loaded, the Resolver is called and the data that resolve executes, will be returned and stored in the variable **param** and passed in the **data** param of the route to the component, where you can use it:
+```typescript
+ngOnInit() {
+    this.route.data.subscribe(
+      (data: Data) => {
+        // do sth with data['param']
+      }
+    );
+  }
+```
+
