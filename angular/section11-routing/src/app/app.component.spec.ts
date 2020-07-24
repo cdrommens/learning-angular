@@ -16,16 +16,16 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have as title 'section12-routing'`, () => {
+  it(`should have as title 'section11-routing'`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('section12-routing');
+    expect(app.title).toEqual('section11-routing');
   });
 
   it('should render title', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement;
-    expect(compiled.querySelector('.content span').textContent).toContain('section12-routing app is running!');
+    expect(compiled.querySelector('.content span').textContent).toContain('section11-routing app is running!');
   });
 });

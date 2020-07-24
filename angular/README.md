@@ -10,6 +10,8 @@ when having errors :
 * Go to package.json and modify `"rxjs": "^6.0.0"` to `"rxjs": "6.0.0"`
 * Then run `npm update` in your project
 
+Otherwise, remove node_modules and package-lock.json, and run `npm install` to redownload all dependencies.
+
 add bootstrap : `npm install --save bootstrap@latest`
 edit angular.json and add in the style section: `"node_modules/bootstrap/dist/css/bootstrap.min.css"`
 
