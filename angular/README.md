@@ -452,11 +452,13 @@ Using the snapshot is only permitted in the initialisation, because angular will
 ngOnInit() {
   this.route.snapshot.params['param']; // initializing value
   this.route.params.subscribe((params: Params) => { // do sth every time the value changes
-        // do sth with params['param]
+        // do sth with params['param] or params.param
       });
 }
 ```
 So only use observable if you know that the component will change when you are already on the component. If your component always changes by navigating to it from other components, you don't need to use observables and your fine with snapshot.
+
+> Since this is a built-in observable, there is no need to clean this observable. You do have to clean it up when you implement your own observables
 
 ### Passing query parameters
 
@@ -593,9 +595,138 @@ When the route is loaded, the Resolver is called and the data that resolve execu
 ngOnInit() {
     this.route.data.subscribe(
       (data: Data) => {
-        // do sth with data['param']
+        // do sth with data['param'] or data.param
       }
     );
   }
 ```
 
+## Section 13 - Observables
+
+### Predefinied observables
+
+You can use predefinied observables from the rxJs package, like for example `interval`. This will emit every x ms an incrementing number:
+```typescript
+interval(1000).subscribe(count => {
+      console.log(count);
+    });
+```
+
+> Even if you navigate away from the page with the observable, it will keep emitting! There is no automatic cleanup. Even worse, if you navigate back to the page with the observable, a new observable will be emitted, which will cause memory looks in te end.
+
+To solve this, store the observable in a variable and call unsubscribe:
+```typescript
+private firstObservableSubscription: Subscription;
+
+ngOnInit(): void {
+  this.firstObservableSubscription = interval(1000).subscribe((count) => {
+    console.log(count);
+  });
+}
+
+ngOnDestroy(): void {
+  this.firstObservableSubscription.unsubscribe();
+}
+```
+
+### Building a custom observable
+
+We want to create our own observable that mimics the interval observer. You can do this by creating a new `Observable`object with an observer as param.
+The body of the observer tells the observable what to do. You have 3 methods for sending data :
+* next(param) : emits param
+* error(param) : stops the observable and emits error data
+* complete() : tells the observable that the stream is finished:
+* 
+```typescript
+const customObservable = new Observable((observer) => {
+      setInterval(() => {
+        //logic
+        observer.next(data);
+        if (stream is completed) {
+          observer.complete();
+        }
+        if (error situation) {
+          observer.error('There is an error');
+        }
+      }, 1000);
+    });
+```
+You can use these 3 situations when you subscribe to the observable :
+```typescript
+this.customObservableSubscription = customObservable.subscribe(data => {
+      // logic for handling the received data
+    }, error => {
+        // logic for handling the error
+    }, () => {
+        // logic for handling the completion
+    });
+```
+
+### Operators
+
+You can also manipulate the data like Java Streams way. To do this, you have to import functions from the `rxjs/operators`package.
+Then on the obervable you call the `pipe()`method with as arguments as many functions that you want, like `map`, `filter`, etc:
+```typescript
+import { map, filter } from 'rxjs/operators';
+
+myObservable.pipe( map( data => { return data + 1}), filter( data => return data === 2), ...)
+            .subscribe(...);
+```
+
+For more see [learnrxjs.io](https://www.learnrxjs.io).
+
+### Subjects
+
+Subjects can be used to replace the use of an EventEmitter to pass events between components.
+
+So the EventEmitter approach:
+```typescript
+// Service that holds the EventEmitter
+export class Service {
+  emitter = new EventEmitter<boolean>();
+}
+// Component that emits the event
+export class SendingComponent {
+  onActivate() {
+    this.service.emitter.emit(data);
+  }
+}
+// Component that receives the event
+export class ReceivingComponent {
+  ngOnInit(): void {
+    this.service.emitter.subscribe(data => {
+      // do sth with data
+    })
+  }
+}
+```
+
+We can replace EventEmitter with `Subject`from rxjs library:
+```typescript
+// Service that holds the EventEmitter
+export class Service {
+  emitter = new Subject<boolean>();
+}
+// Component that emits the event
+export class SendingComponent {
+  onActivate() {
+    this.service.emitter.next(data);
+  }
+}
+// Component that receives the event
+export class ReceivingComponent {
+  private activatedSub: Subscription;
+
+  ngOnInit(): void {
+    this.activatedSub = this.service.emitter.subscribe(data => {
+      // do sth with data
+    })
+  }
+  ngOnDestroy(): void {
+    this.activatedSub.unsubscribe();
+  }
+}
+```
+
+> If you have a **passive** eventsource (for example an http call), you use an Observable with `next()`inside of the body. If you have an **active** eventsource (for example an emitter), you call `next()`outside of the body. It can be triggered by the application.
+> Use Subject for cross-component communication; use EventEmitter if you use `@Output`.
