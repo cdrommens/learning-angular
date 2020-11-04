@@ -730,3 +730,100 @@ export class ReceivingComponent {
 
 > If you have a **passive** eventsource (for example an http call), you use an Observable with `next()`inside of the body. If you have an **active** eventsource (for example an emitter), you call `next()`outside of the body. It can be triggered by the application.
 > Use Subject for cross-component communication; use EventEmitter if you use `@Output`.
+
+## Section 15 - Forms
+
+There are 2 ways angular handles forms:
+* template driven
+* reactiva
+
+### Template driven
+
+### No binding
+
+First make sure to use the `FormsModule` of angular in app.module.ts:
+```typescript
+import { FormsModule } from '@angular/forms';
+imports: [
+    FormsModule
+  ],
+```
+
+This will cause Angular creating a Form object when he encounters `<form></form>` in the HTML. 
+To tell Angular which inputs he has to manage, just add `ngModel` as an attribute and give it a name:
+```html
+<input type="text" id="username" class="form-control" ngModel name="username"/>
+```
+To be able to submit this form, add the event `ngSubmit` onto the form with a method that must be called in your code and a reference to the form data:
+```html
+<form (ngSubmit)="onSubmit(f)" #f="ngForm">
+```
+
+In your code :
+```typescript
+onSubmit(form: NgForm) {}
+```
+
+Instead of passing the reference, you can also make use of `@ViewChild`:
+```html
+<form (ngSubmit)="onSubmit()" #f="ngForm">
+```
+
+In your code:
+```typescript
+@ViewChild('f') myForm: NgForm;
+
+onSubmit() { //do sth with this.myForm 
+}
+```
+### One way binding 
+ 
+To set a default value, you can use `ngModel` with **one-way binding** :
+```html
+<select id="secret" class="form-control" [ngModel]="defaultQuestion" name="secret">
+  <option value="pet">Your first pet?</option>
+  <option value="teacher">Your first teacher?</option>
+</select>
+```
+where defaultQuestion is one of the values of the options.
+
+### Two way binding
+
+To simultanous show the value in another field, you can use `ngModel` with **two-way binding** :
+```html
+<textarea name="questionAnswer" rows="3" class="form-control" [(ngModel)]="answer"></textarea>
+ <p>Your reply: {{ answer}}</p>
+```
+
+### Validating
+
+Built-in HTML validators as keyword in the HTML tag (eg `<input type="text" required />`):
+* required
+* email
+* checkboxrequired
+* minlength
+* maxlength
+* pattern
+  
+There is a valid value on each level (form and control) that indicates if the form is valid or not.
+For example to disable the submit button if the form is not valid:
+```html
+<button class="btn btn-primary"
+        type="submit"
+        [disabled]="!f.valid">Submit</button>
+```
+
+When a form or element is invalid, Angular automatically give it the class `ng-invalid`. So you can give your own style to it:
+```css
+input.ng-invalid.ng-touched {
+  border: 1px solid red;
+}
+```
+The `ng-touched` is to only give the style to it when the user has clicked on the element.
+
+To show error messages, you can add a local reference to `ngModel` of this element:
+```html
+<input type="email" id="email" class="form-control" ngModel name="email" required email #email="ngModel" />
+<span class="form-text text-muted" *ngIf="!email.valid && email.touched">Please enter a valid email!</span>
+```
+
