@@ -827,3 +827,64 @@ To show error messages, you can add a local reference to `ngModel` of this eleme
 <span class="form-text text-muted" *ngIf="!email.valid && email.touched">Please enter a valid email!</span>
 ```
 
+### Grouping controls
+
+All of the above mechanisms can be applied to groups of controls, by wrapping them in a div with `ngModelGroup` :
+```html
+<div id="user-data" ngModelGroup="userData" #userData="ngModelGroup">
+  <input type="text" ...>
+  <input type="text" ...>
+</div>
+<p *ngIf="!userData.valid && userData.touched"> User Data is invalid!</p>
+```
+
+### Programmatically set the values of the form
+
+You can use `setValue` for that:
+```typescript
+this.myForm.setValue({
+  userData: {
+    username: suggestedName,
+    email: ''
+  },
+  secret: 'pet',
+  questionAnswer: '',
+  gender: 'male'
+});
+```
+> Note: you have to pass the entire form and all values will be overwritten!
+
+If you only want to change 1 or more values, without setting the rest, use `patchValue()`:
+```typescript
+this.signupForm.form.patchValue({
+  userData: {
+    username: suggestedName
+  }
+});
+```
+
+### Using the values of the form
+
+In your code, define an object with the fields of your form, that you fill in on submit :
+```typescript
+myFormObject = {
+  field1: '',
+  field2: ''
+};
+
+onSubmit() {
+  this.myFormObject.field1 = this.myForm.field1;
+  this.myFormObject.field2 = this.myForm.field2;
+}
+```
+and in the template:
+```html
+<input type="button" (click)="onSubmit()">
+<p>Field1 : {{ myFormObject.field1 }}</p>
+<p>Field2 : {{ myFormObject.field2 }}</p>
+```
+
+> If you use grouped fields (with ngModelGroup), don't forget to mention this :
+> `this.myForm.myGroupedElements.field`
+
+To clear the complete form, use `reset()` : `this.signupForm.reset();`
