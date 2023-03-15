@@ -1,5 +1,7 @@
 # Angular
 
+See https://angular-training-guide.rangle.io/
+
 ## Section 1 - Getting started
 
 create new app : `ng new <name>`
